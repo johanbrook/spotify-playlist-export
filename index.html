@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Spotify Playlist Export</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Spotify Playlist Export</h1>
+
+    <section>
+      <h2>1. Grant access</h2>
+
+      <p>
+        <a class="btn-login" href="#">Login with Spotify</a>
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Choose account</h2>
+
+      <form id="userform" novalidate>
+        <label for="username">Username</label>
+        <input type="text" id="username" required />
+        <input type="submit" value="Fetch playlists" />
+      </form>
+    </section>
+
+    <section>
+      <h2>3. Select playlists</h2>
+
+      <div id="select-playlists">
+
+      </div>
+    </section>
+
+    <script id="playlists" type="text/x-handlebars-template">
+      <ul class="playlists">
+        {{#if playlists}}
+          {{#each playlists}}
+            <li>{{> playlistItem}}</li>
+          {{/each}}
+        {{else}}
+          <p class="no-content">No playlists</p>
+        {{/if}}
+      </ul>
+    </script>
+
+    <script id="playlist-item" type="text/x-handlebars-template">
+      <input type="checkbox" /> {{name}} ({{tracks.total}} tracks) <a target="_blank" href="{{external_urls.spotify}}">[Open in Spotify]</a>
+    </script>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="build/bundle.js"></script>
+
+    <script>
+      $(function() {
+        App.initialize()
+      })
+    </script>
+  </body>
+</html>

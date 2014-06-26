@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Spotify Export</title>
+    <script>
+      var target = window.self === window.top ? window.opener : window.parent,
+          hash = window.location.hash
+
+      if (hash) {
+        var token = window.location.hash.split('&')[0].split('=')[1]
+        target.postMessage(token, 'http://localhost:3000')
+      }
+
+    </script>
+  </head>
+  <body>
+
+  </body>
+</html>
