@@ -7,13 +7,11 @@ Export track info from your Spotify playlists.
 - [x] User should be able to view their playlists
   - [ ] User should be able to view playlist metadata
 - [x] User should be able to re-visit the state from an URL
-- [ ] User should be able to view all tracks in a playlist
-  - [ ] User should be able to view track metadata
 - [ ] User should be able to export a playlist to:
-  - [ ] JSON
+  - [x] JSON
   - [ ] CSV
-  - [ ] Text
-- [ ] User should be able to choose which playlists to export
+  - [ ] Print
+- [x] User should be able to choose which playlists to export
   - [ ] User should be able to toggle all or none
 - [ ] User should be able to print export from the app
 

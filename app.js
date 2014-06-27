@@ -31,8 +31,11 @@ window.App = (function() {
       window.addEventListener('hashchange', function(evt) {
         this.preFillUsername(Helpers.parseHash(evt.newURL))
       }.bind(this))
+
       window.addEventListener('message', this.onAuthReceived.bind(this))
+
       $(".btn-login").on('click', this.login.bind(this))
+      $("#export").on('click', this.export.bind(this))
 
       $("#userform").on('submit', function(evt) {
         evt.preventDefault()
@@ -55,12 +58,47 @@ window.App = (function() {
       })
     },
 
+    export: function(evt) {
+      var playlistsPromises = this.selectedPlaylists().map(this.fetchPlaylist.bind(this))
+
+      Promise.all(playlistsPromises)
+        .then(Helpers.flattenArray)
+        .then(View.renderResult)
+    },
+
+    selectedPlaylists: function() {
+      return $("#select-playlists li")
+        .filter(function() {
+          return $(this).find("input").is(":checked")
+        })
+        .map(function() {
+          return $(this).data('id')
+        })
+        .toArray()
+    },
+
+    exportMethod: function() {
+      $("input[name='format']").filter(function() {
+        return $(this).is(":checked")
+      }).val()
+    },
+
     setUsername: function(name) {
-      console.info("Saving "+name)
-      Helpers.createPermalink(name)
       return (name) ?
-        Helpers.Store.save({ username: name }).then(P.data('username')) :
+        Helpers.Store.save({ username: name }).then(function(obj) {
+          this.username = name
+          Helpers.createPermalink(name)
+          return name
+        }.bind(this)) :
         Promise.reject('Name cannot be empty')
+    },
+
+    getUsername: function() {
+      if(!this.username) {
+        return Helpers.Store.fetch('username')
+      }
+
+      return Promise.resolve(this.username)
     },
 
     login: function(evt) {
@@ -72,13 +110,13 @@ window.App = (function() {
       if(evt.origin !== 'http://localhost:3000') return
       auth_window && auth_window.close()
 
-      this.auth(evt.data)
-      this.persistAccessToken(evt.data)
+      this.auth(evt.data).then(this.persistAccessToken)
     },
 
     auth: function(token) {
       console.info("Authed!")
       api.setAccessToken(token)
+      return Promise.resolve(token)
     },
 
     preFillUsername: function(username) {
@@ -95,6 +133,13 @@ window.App = (function() {
 
     fetchPlaylists: function(user) {
       return api.getUserPlaylists(user).then(P.data('items'))
+    },
+
+    fetchPlaylist: function(playlistId) {
+      return this.getUsername()
+      .then(function(username) {
+        return api.getPlaylist(username, playlistId)
+      })
     }
   }
 

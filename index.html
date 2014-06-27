@@ -3,6 +3,7 @@
   <head>
     <title>Spotify Playlist Export</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="highlight/github.css" />
   </head>
   <body>
     <h1>Spotify Playlist Export</h1>
@@ -28,16 +29,27 @@
     <section>
       <h2>3. Select playlists</h2>
 
+      <label><input type="radio" name="format" value="json" checked /> JSON</label>
+      <label><input type="radio" name="format" value="print" /> Print</label>
+
+      <button id="export">Export</button>
+
       <div id="select-playlists">
 
       </div>
+    </section>
+
+    <section>
+      <h2>4. Results</h2>
+
+      <pre><code class="hljs" id="results"></code></pre>
     </section>
 
     <script id="playlists" type="text/x-handlebars-template">
       <ul class="playlists">
         {{#if playlists}}
           {{#each playlists}}
-            <li>{{> playlistItem}}</li>
+            <li data-id="{{ id }}">{{> playlistItem}}</li>
           {{/each}}
         {{else}}
           <p class="no-content">No playlists</p>
@@ -46,7 +58,7 @@
     </script>
 
     <script id="playlist-item" type="text/x-handlebars-template">
-      <input type="checkbox" /> {{name}} ({{tracks.total}} tracks) <a target="_blank" href="{{external_urls.spotify}}">[Open in Spotify]</a>
+      <label><input type="checkbox" /> {{name}} ({{tracks.total}} tracks)</label> <a target="_blank" href="{{external_urls.spotify}}">[Open in Spotify]</a>
     </script>
 
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
