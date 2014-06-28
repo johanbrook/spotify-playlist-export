@@ -7,8 +7,13 @@
           hash = window.location.hash
 
       if (hash) {
-        var token = window.location.hash.split('&')[0].split('=')[1]
-        target.postMessage(token, 'http://localhost:3000')
+        var params = hash.split("#")[1].split(/&|=/)
+
+        var data = {
+          token: params[ params.indexOf('access_token') + 1 ],
+          expires: params[ params.indexOf('expires_in') + 1 ]
+        }
+        target.postMessage(data, 'http://localhost:3000')
       }
 
     </script>

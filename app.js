@@ -22,8 +22,11 @@ window.App = (function() {
   return {
 
     initialize: function() {
-      this.checkAuth().catch(function(err) {
-        console.info(err)
+      this.checkAuth().then(function(token) {
+        this.auth(token)
+      }.bind(this),
+      function(msg) {
+        console.error(msg)
       })
 
       this.preFillUsername()
@@ -53,8 +56,20 @@ window.App = (function() {
     },
 
     checkAuth: function() {
-      return this.getAccessToken().then(this.auth.bind(this), function() {
-        throw 'No saved token'
+      var access = this.getAccessToken(),
+          expires = this.getExpireDate()
+
+      return Promise.all([access, expires]).spread(function(token, expireDate) {
+        if(expireDate < new Date()) {
+          // #disable ui
+          return Promise.reject('Access token expired. Get a new one!')
+        }
+        return Promise.resolve(token)
+
+      }.bind(this), function(notFound) {
+        console.info(notFound + " Please re-auth.")
+
+        // #disable ui
       })
     },
 
@@ -110,11 +125,12 @@ window.App = (function() {
       if(evt.origin !== 'http://localhost:3000') return
       auth_window && auth_window.close()
 
-      this.auth(evt.data).then(this.persistAccessToken)
+      this.auth(evt.data.token)
+      this.persistAccessToken(evt.data.token, evt.data.expires)
     },
 
     auth: function(token) {
-      console.info("Authed!")
+      console.info("Authed! With token: " + token)
       api.setAccessToken(token)
       return Promise.resolve(token)
     },
@@ -127,8 +143,15 @@ window.App = (function() {
       return Helpers.Store.fetch('access_token')
     },
 
-    persistAccessToken: function(token) {
-      return Helpers.Store.save({access_token: token})
+    getExpireDate: function() {
+      return Helpers.Store.fetch('expires')
+    },
+
+    persistAccessToken: function(token, expiresIn) {
+      return Helpers.Store.save({
+        access_token: token,
+        expires: Helpers.calculateExpireDateFromToday(expiresIn).getTime()
+      })
     },
 
     fetchPlaylists: function(user) {
