@@ -26,7 +26,7 @@ window.App = (function() {
         this.auth(token)
       }.bind(this),
       function(msg) {
-        console.error(msg)
+        console.info(msg +" Please re-auth.")
       })
 
       this.preFillUsername()
@@ -66,11 +66,7 @@ window.App = (function() {
         }
         return Promise.resolve(token)
 
-      }.bind(this), function(notFound) {
-        console.info(notFound + " Please re-auth.")
-
-        // #disable ui
-      })
+      }.bind(this))
     },
 
     export: function(evt) {
