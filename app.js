@@ -22,24 +22,23 @@ window.App = (function() {
   return {
 
     events: {
-      'window message' : 'onAuthReceived',
-      '.btn-login click': 'login',
-      '#export click' : 'export',
-      '#userform submit' : 'foo',
-      'window hashchange' : function(evt) {
+      'message window' : 'onAuthReceived',
+      'click .btn-login': 'login',
+      'click #export' : 'export',
+      'submit #userform' : 'foo',
+      'hashchange window' : function(evt) {
         this.preFillUsername(Helpers.parseHash(evt.newURL))
-      }
-    },
-
-    depsMap: {
-      'disabled': function(evt) {
-        $(this).attr('disabled', !$(evt.target).val())
+      },
+      'input #username' : function(evt) {
+        $("#fetch").attr('disabled', !$(evt.target).val())
+      },
+      'click .playlists input[type="radio"]': function(evt) {
+        $("#export").attr('disabled', !$('.playlists input:checked').length)
       }
     },
 
     initialize: function() {
       Helpers.bindEvents.call(this, this.events)
-      Helpers.bindDeps.call(this, this.depsMap)
 
       var whenAuthed = this.checkAuth().then(function(token) {
         this.auth(token)
@@ -52,6 +51,9 @@ window.App = (function() {
         return this.preFillUsername()
       }.bind(this))
       .then(this.fetchAndRenderPlaylists.bind(this))
+      .then(function() {
+        $("#fetch").attr('disabled', false)
+      })
     },
 
     fetchAndRenderPlaylists: function(user) {
