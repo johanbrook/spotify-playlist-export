@@ -31,8 +31,15 @@ window.App = (function() {
       }
     },
 
+    depsMap: {
+      'disabled': function(evt) {
+        $(this).attr('disabled', !$(evt.target).val())
+      }
+    },
+
     initialize: function() {
       Helpers.bindEvents.call(this, this.events)
+      Helpers.bindDeps.call(this, this.depsMap)
 
       var whenAuthed = this.checkAuth().then(function(token) {
         this.auth(token)
