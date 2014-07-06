@@ -21,7 +21,19 @@ window.App = (function() {
 
   return {
 
+    events: {
+      'window message' : 'onAuthReceived',
+      '.btn-login click': 'login',
+      '#export click' : 'export',
+      '#userform submit' : 'foo',
+      'window hashchange' : function(evt) {
+        this.preFillUsername(Helpers.parseHash(evt.newURL))
+      }
+    },
+
     initialize: function() {
+      Helpers.bindEvents.call(this, this.events)
+
       this.checkAuth().then(function(token) {
         this.auth(token)
       }.bind(this),
@@ -30,29 +42,19 @@ window.App = (function() {
       })
 
       this.preFillUsername()
+    },
 
-      window.addEventListener('hashchange', function(evt) {
-        this.preFillUsername(Helpers.parseHash(evt.newURL))
-      }.bind(this))
+    foo: function(evt) {
+      evt.preventDefault()
 
-      window.addEventListener('message', this.onAuthReceived.bind(this))
+      var username = $(evt.target).find("#username").val()
 
-      $(".btn-login").on('click', this.login.bind(this))
-      $("#export").on('click', this.export.bind(this))
-
-      $("#userform").on('submit', function(evt) {
-        evt.preventDefault()
-
-        var username = $(evt.target).find("#username").val()
-
-        this.setUsername(username)
-        .then(this.fetchPlaylists.bind(this))
-        .then(View.renderPlaylists.bind(View))
-        .catch(function(err) {
-          console.error(err)
-        })
-
-      }.bind(this))
+      this.setUsername(username)
+      .then(this.fetchPlaylists.bind(this))
+      .then(View.renderPlaylists.bind(View))
+      .catch(function(err) {
+        console.error(err)
+      })
     },
 
     checkAuth: function() {
