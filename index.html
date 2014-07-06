@@ -46,15 +46,15 @@
     </section>
 
     <script id="playlists" type="text/x-handlebars-template">
+      {{#if playlists}}
       <ul class="playlists">
-        {{#if playlists}}
-          {{#each playlists}}
-            <li data-id="{{ id }}">{{> playlistItem}}</li>
-          {{/each}}
-        {{else}}
-          <p class="no-content">No playlists</p>
-        {{/if}}
+        {{#each playlists}}
+          <li data-id="{{ id }}">{{> playlistItem}}</li>
+        {{/each}}
       </ul>
+      {{else}}
+        <p class="no-content">No playlists</p>
+      {{/if}}
     </script>
 
     <script id="playlist-item" type="text/x-handlebars-template">
