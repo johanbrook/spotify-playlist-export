@@ -34,14 +34,25 @@ window.App = (function() {
     initialize: function() {
       Helpers.bindEvents.call(this, this.events)
 
-      this.checkAuth().then(function(token) {
+      var whenAuthed = this.checkAuth().then(function(token) {
         this.auth(token)
       }.bind(this),
       function(msg) {
         console.info(msg +" Please re-auth.")
       })
 
-      this.preFillUsername()
+      whenAuthed.then(function() {
+        return this.preFillUsername()
+      }.bind(this))
+      .then(this.fetchAndRenderPlaylists.bind(this))
+    },
+
+    fetchAndRenderPlaylists: function(user) {
+      return this.fetchPlaylists(user)
+        .then(View.renderPlaylists.bind(View))
+        .catch(function(err) {
+          console.error(err)
+        })
     },
 
     foo: function(evt) {
@@ -50,11 +61,7 @@ window.App = (function() {
       var username = $(evt.target).find("#username").val()
 
       this.setUsername(username)
-      .then(this.fetchPlaylists.bind(this))
-      .then(View.renderPlaylists.bind(View))
-      .catch(function(err) {
-        console.error(err)
-      })
+      .then(this.fetchAndRenderPlaylists.bind(this))
     },
 
     checkAuth: function() {
@@ -134,7 +141,14 @@ window.App = (function() {
     },
 
     preFillUsername: function(username) {
-      $("#username").val( username ? username : (Helpers.getUsernameFromURL() || '') )
+      var name = username ? username : (Helpers.getUsernameFromURL() || '')
+
+      if(name) {
+        $("#username").val(name)
+        return Promise.resolve(name)
+      }
+
+      return Promise.reject('Name cannot be empty')
     },
 
     getAccessToken: function() {
