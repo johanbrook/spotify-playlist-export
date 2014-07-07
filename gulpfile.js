@@ -9,7 +9,8 @@ var gulp = require('gulp')
     notify = require('gulp-notify'),
     concat = require('gulp-concat'),
     rev = require('gulp-rev'),
-    compress = require('gulp-uglify')
+    compress = require('gulp-uglify'),
+    mocha = require('gulp-mocha')
 
 var build = function() {
   gulp.src('app.js')
@@ -17,6 +18,15 @@ var build = function() {
     .on('error', notify.onError("<%= error.message%>"))
     .pipe(concat('bundle.js'))
     .pipe(gulp.dest('./build'))
+}
+
+var testAll = function() {
+  gulp.src(['tests/*.js'], { read: false })
+    .pipe(mocha({
+      globals: ['should'],
+      reporter: 'spec'
+    }))
+    .on('error', notify.onError("<%= error.message%>"))
 }
 
 gulp.task('default', ['build'])
@@ -42,9 +52,15 @@ gulp.task('serve', function() {
 })
 
 gulp.task('watch', ['serve'], function() {
-  gulp.src(['app.js', 'lib/*.js'])
-    .pipe(watch(build))
+  var files = gulp.src(['app.js', 'lib/*.js'])
 
+  files.pipe(watch(build))
+  files.pipe(watch(testAll))
+
+})
+
+gulp.task('test', function() {
+  testAll()
 })
 
 gulp.task('clean', ['clean:build', 'clean:dist'])
