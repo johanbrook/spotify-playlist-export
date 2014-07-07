@@ -52,10 +52,10 @@ gulp.task('serve', function() {
 })
 
 gulp.task('watch', ['serve'], function() {
-  var files = gulp.src(['app.js', 'lib/*.js'])
+  var files = ['app.js', 'lib/*.js']
 
-  files.pipe(watch(build))
-  files.pipe(watch(testAll))
+  gulp.src(files).pipe(watch(build))
+  gulp.src((files.push('tests/*.js') && files)).pipe(watch(testAll))
 
 })
 
