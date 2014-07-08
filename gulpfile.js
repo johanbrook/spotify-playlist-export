@@ -55,7 +55,7 @@ gulp.task('watch', ['serve'], function() {
   var files = ['app.js', 'lib/*.js']
 
   gulp.src(files).pipe(watch(build))
-  gulp.src((files.push('tests/*.js') && files)).pipe(watch(testAll))
+  gulp.src(['lib/*.js', 'tests/*.js']).pipe(watch(testAll))
 
 })
 
