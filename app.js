@@ -5,7 +5,9 @@ window.App = (function() {
   var Helpers = require('./lib/helpers'),
       P = require('./lib/p'),
       SpotifyWebApi = require('./lib/spotify'),
+
       View = require('./lib/view'),
+      ViewStateMachine = require('./lib/ViewStateMachine'),
 
       api = new SpotifyWebApi()
 
@@ -20,6 +22,20 @@ window.App = (function() {
   }
 
   return {
+
+    Views: {
+      Playlists: new View({
+        el: '#select-playlists',
+        template: '#playlists-template',
+        initialize: function(Handlebars) {
+          Handlebars.registerPartial('playlistItem', $('#playlist-item').html())
+        }
+      }),
+
+      Results: new View({
+        el: '#results'
+      })
+    },
 
     events: {
       'message window' : 'onAuthReceived',
@@ -40,6 +56,15 @@ window.App = (function() {
     initialize: function() {
       Helpers.bindEvents.call(this, this.events)
 
+      this.machine = new ViewStateMachine({
+        initial: '.auth',
+        events: [
+          { name: 'chooseAccount', from: '.auth', to: '.account' },
+          { name: 'selectPlaylists', from: '.account', to: '.select-playlists' },
+          { name: 'showResults', from: '.select-playlists', to: '.results' }
+        ]
+      })
+
       var whenAuthed = this.checkAuth().then(function(token) {
         this.auth(token)
       }.bind(this),
@@ -58,7 +83,9 @@ window.App = (function() {
 
     fetchAndRenderPlaylists: function(user) {
       return this.fetchPlaylists(user)
-        .then(View.renderPlaylists.bind(View))
+        .then(function(playlists) {
+          return this.Views.Playlists.render({playlists: playlists})
+        }.bind(this))
         .catch(function(err) {
           console.error(err)
         })
@@ -92,7 +119,11 @@ window.App = (function() {
 
       Promise.all(playlistsPromises)
         .then(Helpers.flattenArray)
-        .then(View.renderResult)
+        .then(function(json) {
+          this.Views.Results.customRender(function() {
+            return JSON.stringify(json, null, 2)
+          })
+        }.bind(this))
     },
 
     selectedPlaylists: function() {
