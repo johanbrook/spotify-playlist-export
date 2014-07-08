@@ -1,12 +1,12 @@
 var chai = require('chai')
 chai.should()
 
-var ViewStateMachine = require('../lib/ViewStateMachine')
+var StateMachine = require('../lib/ViewStateMachine').StateMachine
 
-describe('ViewStateMachine', function() {
+describe('StateMachine', function() {
 
   beforeEach(function() {
-    this.m = new ViewStateMachine({
+    this.m = new StateMachine({
       initial: 'state0',
       events: [
         { name: 'warn', from: 'state0', to: 'state1' },

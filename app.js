@@ -7,7 +7,7 @@ window.App = (function() {
       SpotifyWebApi = require('./lib/spotify'),
 
       View = require('./lib/view'),
-      ViewStateMachine = require('./lib/ViewStateMachine'),
+      ViewStateMachine = require('./lib/ViewStateMachine').ViewStateMachine,
 
       api = new SpotifyWebApi()
 
@@ -59,26 +59,36 @@ window.App = (function() {
       this.machine = new ViewStateMachine({
         initial: '.auth',
         events: [
-          { name: 'chooseAccount', from: '.auth', to: '.account' },
-          { name: 'selectPlaylists', from: '.account', to: '.select-playlists' },
-          { name: 'showResults', from: '.select-playlists', to: '.results' }
+          { name: 'chooseAccount',   from: '.auth',              to: '.account'           },
+          { name: 'selectPlaylists', from: '.account',           to: '.select-playlists'  },
+          { name: 'showResults',     from: '.select-playlists',  to: '.results'           }
         ]
+      })
+      var app = this
+      this.machine.on('transition', function() {
+        if(this.current === '.account') {
+          app.preFillUsername()
+        }
       })
 
       var whenAuthed = this.checkAuth().then(function(token) {
-        this.auth(token)
+        return this.auth(token)
       }.bind(this),
       function(msg) {
         console.info(msg +" Please re-auth.")
+        return Promise.reject(msg)
       })
 
       whenAuthed.then(function() {
+        this.machine.chooseAccount()
         return this.preFillUsername()
       }.bind(this))
       .then(this.fetchAndRenderPlaylists.bind(this))
       .then(function() {
         $("#fetch").attr('disabled', false)
-      })
+        this.machine.chooseAccount()
+        this.machine.selectPlaylists()
+      }.bind(this))
     },
 
     fetchAndRenderPlaylists: function(user) {
@@ -98,6 +108,7 @@ window.App = (function() {
 
       this.setUsername(username)
       .then(this.fetchAndRenderPlaylists.bind(this))
+      .then(this.machine.selectPlaylists.bind(this.machine))
     },
 
     checkAuth: function() {
@@ -123,6 +134,8 @@ window.App = (function() {
           this.Views.Results.customRender(function() {
             return JSON.stringify(json, null, 2)
           })
+
+          this.machine.showResults()
         }.bind(this))
     },
 
@@ -177,6 +190,9 @@ window.App = (function() {
     auth: function(token) {
       console.info("Authed! With token: " + token)
       api.setAccessToken(token)
+
+      this.machine.chooseAccount()
+
       return Promise.resolve(token)
     },
 

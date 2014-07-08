@@ -8,7 +8,7 @@
   <body>
     <h1>Spotify Playlist Export</h1>
 
-    <section>
+    <section class="auth">
       <h2>1. Grant access</h2>
 
       <p>
@@ -16,7 +16,7 @@
       </p>
     </section>
 
-    <section>
+    <section class="account">
       <h2>2. Choose account</h2>
 
       <form id="userform" novalidate>
@@ -26,7 +26,7 @@
       </form>
     </section>
 
-    <section>
+    <section class="select-playlists">
       <h2>3. Select playlists</h2>
 
       <label><input type="radio" name="format" value="json" checked /> JSON</label>
@@ -39,7 +39,7 @@
       </div>
     </section>
 
-    <section>
+    <section class="results">
       <h2>4. Results</h2>
 
       <pre><code id="results"></code></pre>
