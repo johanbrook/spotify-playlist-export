@@ -43,8 +43,36 @@
     <section class="results">
       <h2>4. Results</h2>
 
-      <pre><code id="results"></code></pre>
+      <div id="results"></div>
     </section>
+
+    <script id="results-nice" type="text/x-handlebars-template">
+      {{#each playlists}}
+      <h2>{{name}}</h2>
+      <table caption="Playlist: {{name}}">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Artist</th>
+            <th>Album</th>
+            <th>Length</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each tracks.items}}
+          {{#with track}}
+          <tr>
+            <td>{{name}}</td>
+            <td>{{artists}}</td>
+            <td>{{album.name}}</td>
+            <td>{{durationInMinutes duration_ms}}</td>
+          </tr>
+          {{/with}}
+          {{/each}}
+        </tbody>
+      </table>
+      {{/each}}
+    </script>
 
     <script id="playlists-template" type="text/x-handlebars-template">
       {{#if playlists}}

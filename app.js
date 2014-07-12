@@ -2,6 +2,8 @@ window.App = (function() {
 
   'use strict'
 
+  require('./lib/template-helpers')
+
   var Helpers = require('./lib/helpers'),
       P = require('./lib/p'),
       SpotifyWebApi = require('./lib/spotify'),
@@ -33,7 +35,8 @@ window.App = (function() {
       }),
 
       Results: new View({
-        el: '#results'
+        el: '#results',
+        template: '#results-nice'
       })
     },
 
@@ -129,7 +132,7 @@ window.App = (function() {
 
       var methodMap = {
         'json': function(playlists) {
-          return JSON.stringify(playlists, null, 2)
+          return '<pre><code>'+JSON.stringify(playlists, null, 2)+'</code></pre>'
         },
         'json-simplified': function(playlists) {
           var only = 'name description external_urls tracks uri'.split(' '),
@@ -151,9 +154,8 @@ window.App = (function() {
             return playlist
           })
 
-          return JSON.stringify(result, null, 2)
-        },
-        'print': null
+          return '<pre><code>'+JSON.stringify(result, null, 2)+'</code></pre>'
+        }
       }
 
       var choice = $('[name="format"]:checked').val(),
@@ -164,9 +166,13 @@ window.App = (function() {
       Promise.all(playlistsPromises)
         .then(Helpers.flattenArray)
         .then(function(playlists) {
-          this.Views.Results.customRender(method, playlists)
+          if(choice.indexOf('json') === -1)
+            this.Views.Results.render({ playlists: playlists })
+          else
+            this.Views.Results.customRender(method, playlists)
 
           this.machine.showResults()
+
         }.bind(this))
     },
 
@@ -179,12 +185,6 @@ window.App = (function() {
           return $(this).data('id')
         })
         .toArray()
-    },
-
-    exportMethod: function() {
-      $("input[name='format']").filter(function() {
-        return $(this).is(":checked")
-      }).val()
     },
 
     setUsername: function(name) {
@@ -261,7 +261,7 @@ window.App = (function() {
     fetchPlaylist: function(playlistId) {
       return this.getUsername()
       .then(function(username) {
-        return api.getPlaylist(username, playlistId)
+        return api.getPlaylist(username, playlistId, { limit: 1000 })
       })
     }
   }
