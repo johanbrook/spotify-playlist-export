@@ -116,6 +116,7 @@ window.App = (function() {
           expires = this.getExpireDate()
 
       return Promise.all([access, expires]).spread(function(token, expireDate) {
+        console.log(new Date(expireDate), new Date(), expireDate < new Date())
         if(expireDate < new Date()) {
           // #disable ui
           return Promise.reject('Access token expired. Get a new one!')
@@ -216,9 +217,10 @@ window.App = (function() {
     },
 
     persistAccessToken: function(token, expiresIn) {
+      expiresIn = parseInt(expiresIn)  // make sure it's an integer
       return Helpers.Store.save({
         access_token: token,
-        expires: Helpers.calculateExpireDateFromToday(expiresIn).getTime()
+        expires: Helpers.calculateExpireDateFromToday(expiresIn)
       })
     },
 
