@@ -116,7 +116,6 @@ window.App = (function() {
           expires = this.getExpireDate()
 
       return Promise.all([access, expires]).spread(function(token, expireDate) {
-        console.log(new Date(expireDate), new Date(), expireDate < new Date())
         if(expireDate < new Date()) {
           // #disable ui
           return Promise.reject('Access token expired. Get a new one!')
@@ -127,14 +126,45 @@ window.App = (function() {
     },
 
     export: function(evt) {
+
+      var methodMap = {
+        'json': function(playlists) {
+          return JSON.stringify(playlists, null, 2)
+        },
+        'json-simplified': function(playlists) {
+          var only = 'name description external_urls tracks uri'.split(' '),
+              onlyInTracks = 'items total'.split(' '),
+              onlyInItem = 'added_at track'.split(' '),
+              notInTrack = 'available_markets href track_number type id images explicit external_ids external_urls popularity preview_url duration_ms disc_number'.split(' ')
+
+          var result = playlists.map(function(playlist) {
+            playlist = Helpers.pick(playlist, only)
+            playlist.tracks = Helpers.pick(playlist.tracks, onlyInTracks)
+            playlist.tracks.items = playlist.tracks.items.map(function(item) {
+              item = Helpers.pick(item, onlyInItem)
+              item = Helpers.omit(item.track, notInTrack)
+              item.album = item.album.name
+              item.artists = item.artists.map(function(a) {return a.name}).join(', ')
+              return item
+            })
+
+            return playlist
+          })
+
+          return JSON.stringify(result, null, 2)
+        },
+        'print': null
+      }
+
+      var choice = $('[name="format"]:checked').val(),
+          method = choice && methodMap[choice]
+
       var playlistsPromises = this.selectedPlaylists().map(this.fetchPlaylist.bind(this))
 
       Promise.all(playlistsPromises)
         .then(Helpers.flattenArray)
-        .then(function(json) {
-          this.Views.Results.customRender(function() {
-            return JSON.stringify(json, null, 2)
-          })
+        .then(function(playlists) {
+          this.Views.Results.customRender(method, playlists)
 
           this.machine.showResults()
         }.bind(this))
