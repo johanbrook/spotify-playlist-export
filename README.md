@@ -11,7 +11,7 @@ Export track info from your Spotify playlists.
 - [ ] User should be able to export a playlist to:
   - [x] JSON
   - [ ] CSV
-  - [ ] Print
+  - [x] Print
 - [x] User should be able to choose which playlists to export
   - [ ] User should be able to toggle all or none
 - [ ] User should be able to print export from the app
